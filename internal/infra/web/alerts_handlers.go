@@ -2,8 +2,9 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/usecase"
 	"net/http"
+
+	"github.com/henriquemarlon/hipercongo/internal/usecase"
 )
 
 type AlertHandlers struct {

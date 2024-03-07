@@ -2,18 +2,19 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/domain/entity"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/infra/repository"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/usecase"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
 	"sync"
 	"time"
-	"encoding/json"
+
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
+	"github.com/henriquemarlon/hipercongo/internal/infra/repository"
+	"github.com/henriquemarlon/hipercongo/internal/usecase"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {

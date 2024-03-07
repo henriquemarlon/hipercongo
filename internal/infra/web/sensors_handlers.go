@@ -3,12 +3,12 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/usecase"
+
+	"github.com/henriquemarlon/hipercongo/internal/usecase"
 )
 
-
 type SensorHandlers struct {
-	CreateSensorUseCase   *usecase.CreateSensorUseCase
+	CreateSensorUseCase *usecase.CreateSensorUseCase
 }
 
 func NewSensorHandlers(createSensorUseCase *usecase.CreateSensorUseCase) *SensorHandlers {

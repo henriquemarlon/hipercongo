@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/domain/entity"
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 )

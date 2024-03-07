@@ -6,10 +6,10 @@ import (
 	"fmt"
 	ckafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/go-chi/chi/v5"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/infra/kafka"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/infra/repository"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/infra/web"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/usecase"
+	"github.com/henriquemarlon/hipercongo/internal/infra/kafka"
+	"github.com/henriquemarlon/hipercongo/internal/infra/repository"
+	"github.com/henriquemarlon/hipercongo/internal/infra/web"
+	"github.com/henriquemarlon/hipercongo/internal/usecase"
 	_ "github.com/lib/pq"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -39,7 +39,7 @@ func main() {
 		"sasl.username":      os.Getenv("CONFLUENT_API_KEY"),
 		"sasl.password":      os.Getenv("CONFLUENT_API_SECRET"),
 		"session.timeout.ms": 6000,
-		"group.id":           "orbit-city",
+		"group.id":           "hipercongo",
 		"auto.offset.reset":  "latest",
 	}
 
@@ -61,7 +61,7 @@ func main() {
 	findAllAlertsUseCase := usecase.NewFindAllAlertsUseCase(alertRepository)
 	alertHandlers := web.NewAlertHandlers(createAlertUseCase, findAllAlertsUseCase)
 
-	//TODO: this is the best way to do this? need to refactor or find another way to start the server
+	//TODO: is this the best way to do this? need to refactor or find another way to start the server
 	router := chi.NewRouter()
 	router.Get("/alerts", alertHandlers.FindAllAlertsHandler)
 	router.Post("/alerts", alertHandlers.CreateAlertHandler)

@@ -1,9 +1,10 @@
 package usecase
 
 import (
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/domain/entity"
 	"log"
 	"time"
+
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
 )
 
 type CreateSensorLogUseCase struct {

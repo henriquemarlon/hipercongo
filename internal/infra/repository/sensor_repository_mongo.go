@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/domain/entity"
+	"log"
+
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 )
 
 type SensorRepositoryMongo struct {
@@ -57,7 +58,7 @@ func (s *SensorRepositoryMongo) FindAllSensors() ([]*entity.Sensor, error) {
 		}
 		sensors = append(sensors, &sensorData)
 	}
-	
+
 	if err := cur.Err(); err != nil {
 		return nil, err
 	}

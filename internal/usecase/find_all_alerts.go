@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	"github.com/henriquemarlon/ENG-COMP-M9/P01-04/internal/domain/entity"
 	"time"
+
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
 )
 
 type FindAllAlertsUseCase struct {

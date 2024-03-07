@@ -1,4 +1,4 @@
-module github.com/henriquemarlon/ENG-COMP-M9/P01-04
+module github.com/henriquemarlon/hipercongo
 
 go 1.21.6
 

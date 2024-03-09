@@ -1,7 +1,7 @@
-.PHONY: test
-test: broker
+.PHONY: tests
+tests:
 	@echo "Running the tests"
-	@go test ./... -coverprofile=coverage_sheet.md
+	@go test ./... -coverprofile=./tools/coverage_sheet.md
 	@docker compose \
 		-f ./compose.yaml \
 		down broker
@@ -21,7 +21,7 @@ migrations:
 
 .PHONY: coverage
 coverage: test
-	@go tool cover -html=./utils/coverage_sheet.md
+	@go tool cover -html=./tools/coverage_sheet.md
 
 .PHONY: env
 env: ./config/.env.develop.tmpl

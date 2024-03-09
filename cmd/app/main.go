@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	options := options.Client().ApplyURI(fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=orbit-city", os.Getenv("MONGODB_ATLAS_USERNAME"), os.Getenv("MONGO_PASSWORD"), os.Getenv("MONGODB_ATLAS_CLUSTER_HOSTNAME")))
+	options := options.Client().ApplyURI(fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s", os.Getenv("MONGODB_ATLAS_USERNAME"), os.Getenv("MONGODB_ATLAS_PASSWORD"), os.Getenv("MONGODB_ATLAS_CLUSTER_HOSTNAME"), os.Getenv("MONGODB_ATLAS_APP_NAME")))
 	client, err := mongo.Connect(context.TODO(), options)
 	if err != nil {
 		log.Fatal(err)
@@ -39,7 +39,7 @@ func main() {
 		"sasl.username":      os.Getenv("CONFLUENT_API_KEY"),
 		"sasl.password":      os.Getenv("CONFLUENT_API_SECRET"),
 		"session.timeout.ms": 6000,
-		"group.id":           "hipercongo",
+		"group.id":           "orbit-city",
 		"auto.offset.reset":  "latest",
 	}
 
@@ -61,7 +61,7 @@ func main() {
 	findAllAlertsUseCase := usecase.NewFindAllAlertsUseCase(alertRepository)
 	alertHandlers := web.NewAlertHandlers(createAlertUseCase, findAllAlertsUseCase)
 
-	//TODO: is this the best way to do this? need to refactor or find another way to start the server
+	//TODO: this is the best way to do this? need to refactor or find another way to start the server
 	router := chi.NewRouter()
 	router.Get("/alerts", alertHandlers.FindAllAlertsHandler)
 	router.Post("/alerts", alertHandlers.CreateAlertHandler)

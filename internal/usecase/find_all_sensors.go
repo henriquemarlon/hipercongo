@@ -9,6 +9,8 @@ type FindAllSensorsUseCase struct {
 	SensorRepository entity.SensorRepository
 }
 
+//TODO: This need be more idiomatic, removing Param type from DTOs
+
 type FindAllSensorsOutputDTO struct {
 	ID        string                  `json:"sensor_id"`
 	Name      string                  `json:"name"`

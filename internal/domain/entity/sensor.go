@@ -39,8 +39,8 @@ func Entropy(newInterval []float64) float64 {
 	return math.Round(rand.Float64()*(newInterval[0]-newInterval[1]) + newInterval[1])
 }
 
-func NewSensor(name string, latitude float64, longitude float64) *Sensor {
-	return &Sensor{Name: name, Latitude: latitude, Longitude: longitude}
+func NewSensor(name string, latitude float64, longitude float64, params map[string]Param) *Sensor {
+	return &Sensor{Name: name, Latitude: latitude, Longitude: longitude, Params: params}
 }
 
 func NewSensorPayload(id string, params map[string]Param, timestamp time.Time) (*SensorPayload, error) {

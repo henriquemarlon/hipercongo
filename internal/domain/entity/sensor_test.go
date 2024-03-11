@@ -13,7 +13,7 @@ func TestEntropy(t *testing.T) {
 }
 
 func TestNewSensor(t *testing.T) {
-	sensor := NewSensor("name", 0, 0)
+	sensor := NewSensor("name", 0, 0, map[string]Param{"key": {Min: 0, Max: 100, Factor: 0.5}})
 	if sensor.Name != "name" {
 		t.Errorf("Name should be name")
 	}

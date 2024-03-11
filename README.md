@@ -52,7 +52,7 @@ Aqui, todos os comandos necessários estão sendo abstraídos por um arquivo Mak
 #### Comando:
 
 ```shell
-make test
+make tests
 ```
 
 #### Output:

@@ -61,6 +61,7 @@ func main() {
 				if err != nil {
 					log.Println("Error converting to JSON:", err)
 				}
+				
 				token := client.Publish("sensors", 1, false, string(jsonBytesPayload))
 				log.Printf("Published: %s, on topic: %s", string(jsonBytesPayload), "sensors")
 				token.Wait()

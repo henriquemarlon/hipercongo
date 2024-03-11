@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/henriquemarlon/hipercongo/internal/infra/mqtt"
 	"github.com/henriquemarlon/hipercongo/internal/infra/repository"
 	"github.com/henriquemarlon/hipercongo/internal/usecase"
 	"github.com/joho/godotenv"
@@ -75,20 +74,19 @@ func TestMqttIntegration(t *testing.T) {
 
 	mqttClient := MQTT.NewClient(opts)
 
-	if session := mqttClient.Connect(); session.Wait() && session.Error() != nil {
-		panic(session.Error())
-	}
-
-
-	subscriberMqttRepository := mqtt.NewSubscriberMQTTRepository("sensors", 1, mqttClient)
+	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	}	
+	
+	go func() {
+		if token := mqttClient.Subscribe("sensors", 1, nil); token.Wait() && token.Error() != nil {
+			fmt.Println(token.Error())
+			return
+		}
+	}()
 
 	defer mqttClient.Disconnect(500)
 
-	go func() {
-		if err := subscriberMqttRepository.Subscribe(handler); err != nil {
-			t.Errorf("Error subscribing: %s", err)
-		}
-	}()
 
 	time.Sleep(150 * time.Second)
 

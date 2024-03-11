@@ -2,7 +2,7 @@
 
 O código contido neste repositório representa o sistema de simulação, mensageria, visualização (Metabase), servidor web e banco de dados NoSQL ( MongoDB ) de um projeto de **Hiperconectividade para Cidades Inteligentes**. Este projeto foi construído conforme as [golang-standards](https://github.com/golang-standards/project-layout) [^1]. Ademais, também foi implementada, dado requisito de alta escalabilidade definido para o projeto, a arquitetura [hexagonal](https://netflixtechblog.com/ready-for-changes-with-hexagonal-architecture-b315ec967749) [^2]
 
-## Requisitos:
+## Dependêcias e Serviços:
 
 Antes de continuar, é necessário instalar as dependências e criar os serviços listados para a execução dos comandos posteriores. Para isso siga as seguintes instruções:
 
@@ -15,7 +15,7 @@ Antes de continuar, é necessário instalar as dependências e criar os serviço
 
 Abaixo estão as possíveis interações e as instruções de como realizá-las.
 
-#### Definir as variáveis de ambiente
+#### Definir as variáveis de ambiente:
 
 ###### Comando:
 ```shell
@@ -28,7 +28,7 @@ Abaixo estão as possíveis interações e as instruções de como realizá-las.
 ```
 
 > [!NOTE]
->
+> - Note
 
 #### Rodar as migrations:
 
@@ -43,7 +43,7 @@ Abaixo estão as possíveis interações e as instruções de como realizá-las.
 ```
 
 > [!NOTE]
->
+> - Note
 
 #### Rodar testes:
 
@@ -62,7 +62,7 @@ make test
 ```
 
 > [!NOTE]
-> - No meio do processo, é necessário subir um broker local para realizar os testes de transmissão de mensagens entre os tópicos.
+> - Note
 
 #### Rodar a visualização da cobertura de testes:
 
@@ -99,7 +99,9 @@ make run
 ```
 
 > [!NOTE]
->  - Este comando está subindo todos os serviços presentes no arquivo compose.yml. São eles, o broker local, a simulação e a api-test que está sendo usada, por hora apenas para mostrar o log do que está sendo transmitido pela simulação.
+>  - Note
+
+## Características do sistema:
 
 [^1]: A estrutura de pastas escolhida para este projeto está de acordo com as convenções e padrões utilizados pela comunidade de desenvolvedores Golang.
 

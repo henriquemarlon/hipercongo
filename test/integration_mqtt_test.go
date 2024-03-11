@@ -25,19 +25,6 @@ type DTO struct {
 	Timestamp time.Time              `json:"timestamp"`
 }
 
-func calculateTimeDifference(timestamps []time.Time) bool {
-	if len(timestamps) < 2 {
-		return false
-	}
-	sort.Slice(timestamps, func(i, j int) bool {
-		return timestamps[i].Before(timestamps[j])
-	})
-	totalDifference := timestamps[len(timestamps)-1].Sub(timestamps[0])
-	errorMargin := 5 * time.Second
-	desiredDifference := time.Minute
-	return totalDifference.Seconds()/float64(len(timestamps)-1) >= (desiredDifference.Seconds()-errorMargin.Seconds()) && totalDifference.Seconds()/float64(len(timestamps)-1) <= (desiredDifference.Seconds()+errorMargin.Seconds())
-}
-
 func TestMqttIntegration(t *testing.T) {
 	godotenv.Load("../config/.env")
 	options := options.Client().ApplyURI(fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s", os.Getenv("MONGODB_ATLAS_USERNAME"), os.Getenv("MONGODB_ATLAS_PASSWORD"), os.Getenv("MONGODB_ATLAS_CLUSTER_HOSTNAME"), os.Getenv("MONGODB_ATLAS_APP_NAME")))
@@ -100,18 +87,23 @@ func TestMqttIntegration(t *testing.T) {
 	time.Sleep(150 * time.Second)
 
 	if len(receipts) < len(sensors) {
-		t.Errorf("No messages received")
+		t.Errorf("Messages receipts received less than expected %v", len(receipts))
 	} else {
-		foundMatch := false
-
 		if len(timestamps) >= 2 {
-			if calculateTimeDifference(timestamps) {
-				foundMatch = true
+			if len(timestamps) < 2 {
+				t.Error("Less than 2 timestamps provided")
+			} else {
+				sort.Slice(timestamps, func(i, j int) bool {
+					return timestamps[i].Before(timestamps[j])
+				})
+				totalDifference := timestamps[len(timestamps)-1].Sub(timestamps[0])
+				errorMargin := 5 * time.Second
+				desiredDifference := time.Minute
+				isLessThanOneMinutePlusError := totalDifference.Seconds()/float64(len(timestamps)-1) >= (desiredDifference.Seconds()-errorMargin.Seconds()) && totalDifference.Seconds()/float64(len(timestamps)-1) <= (desiredDifference.Seconds()+errorMargin.Seconds())
+				if !isLessThanOneMinutePlusError {
+					t.Error("No matching messages found with a 1-minute timestamp difference")
+				}
 			}
-		}
-
-		if !foundMatch {
-			t.Errorf("No matching messages found with a 1-minute timestamp difference")
 		}
 	}
 }

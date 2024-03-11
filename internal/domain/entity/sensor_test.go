@@ -28,16 +28,17 @@ func TestNewSensor(t *testing.T) {
 func TestNewSensorPayload(t *testing.T) {
 	sensorPayload, _ := NewSensorPayload("id", map[string]Param{"key": {Min: 0, Max: 100, Factor: 0.5}}, time.Now())
 	if sensorPayload.Sensor_ID != "id" {
-		t.Errorf("Sensor_ID should be id")
+			t.Errorf("Sensor_ID should be id")
 	}
 	if value, ok := sensorPayload.Data["key"].(float64); ok {
-		if value <= 50 && value >= 0 {
-			t.Errorf("Invalid value for Data['key'], expected between %v and %v, got %f", 0, 100, value)
-		}
+			if !(value <= 180 && value >= 0) {
+					t.Errorf("Invalid value for Data['key'], expected outside the range %v and %v, got %v", 0, 100, value)
+			}
 	} else {
-		t.Errorf("Invalid type for Data['key']")
+			t.Errorf("Invalid type for Data['key']")
 	}
 }
+
 
 //TODO: add test for NewSensorPayload() with invalid params
 

@@ -1,10 +1,13 @@
 .PHONY: tests
 tests:
 	@echo "Running the tests"
-	@go test ./... -coverprofile=./tools/coverage_sheet.md
 	@docker compose \
-		-f ./compose.yaml \
-		down broker
+		-f ./build/compose.yaml \
+		up simulation --build -d
+	@go test ./... -coverprofile=./tools/coverage_sheet.md -v
+	@docker compose \
+		-f ./build/compose.yaml \
+		down simulation
 
 .PHONY: run
 run:

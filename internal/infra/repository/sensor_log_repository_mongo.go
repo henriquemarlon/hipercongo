@@ -20,6 +20,6 @@ func NewSensorLogRepositoryMongo(client *mongo.Client, dbName string, collection
 
 func (s *SensorRepositoryMongo) CreateSensorLog(sensorLog *entity.Log) error {
 	result, err := s.Collection.InsertOne(context.TODO(), sensorLog)
-	log.Printf("Inserting log into the MongoDB collection: %s", result)
+	log.Printf("Inserting log into the MongoDB collection with id: %s", result)
 	return err
 }

@@ -30,7 +30,7 @@ Abaixo estão as possíveis interações e as instruções de como realizá-las.
 > [!NOTE]
 > - Note
 
-### Rodar as migrations:
+### Rodar as migrações:
 
 #### Comando:
 ```shell

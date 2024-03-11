@@ -9,7 +9,7 @@ type CreateSensorUseCase struct {
 	SensorRepository entity.SensorRepository
 }
 
-//TODO: This need be more idiomatic, removing Param type from DTOs
+//TODO: This need be more idiomatic, removing entity.Param type from DTOs
 
 type CreateSensorInputDTO struct {
 	Name      string                  `json:"name"`

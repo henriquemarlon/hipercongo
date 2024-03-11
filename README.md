@@ -13,7 +13,7 @@ Antes de continuar, é necessário instalar as dependências e criar os serviço
 
 ## Como rodar o sistema
 
-Abaixo estão as possíveis interações e as instruções de como realizá-las.
+Siga as intruções abaixo para rodar o sistema junto a todos os seus recortes, simulação, mensageria, banco de dados e vicualização com o Metabase.
 
 ### Definir as variáveis de ambiente:
 

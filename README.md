@@ -19,7 +19,7 @@ Abaixo estão as possíveis interações e as instruções de como realizá-las.
 
 #### Comando:
 ```shell
-
+make env
 ```
 
 #### Output:
@@ -34,7 +34,7 @@ Abaixo estão as possíveis interações e as instruções de como realizá-las.
 
 #### Comando:
 ```shell
-
+make migrations
 ```
 
 #### Output:

@@ -7,7 +7,6 @@ import (
 	"sort"
 	"testing"
 	"time"
-
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/henriquemarlon/hipercongo/internal/infra/mqtt"
 	"github.com/henriquemarlon/hipercongo/internal/infra/repository"
@@ -32,13 +31,29 @@ func TestMqttIntegration(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
-
+	
 	err = mongoClient.Ping(context.TODO(), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var receipts []DTO
 	var timestamps []time.Time
+	
+	repository := repository.NewSensorRepositoryMongo(mongoClient, "mongodb", "sensors")
+	findAllSensorsUseCase := usecase.NewFindAllSensorsUseCase(repository)
+
+	sensors, err := findAllSensorsUseCase.Execute()
+	if err != nil {
+		log.Fatalf("Failed to find all sensors: %v", err)
+	}
+
+	var firstSensorID string
+
+	if len(sensors) > 0 {
+			firstSensorID = sensors[0].ID
+	} else {
+			log.Fatal("No sensors found")
+	}
 
 	var handler MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 		if msg.Qos() != 1 {
@@ -49,10 +64,8 @@ func TestMqttIntegration(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error unmarshalling payload: %s", err)
 		}
-
 		receipts = append(receipts, dto)
-		idMock := "65e9f02ecf3faed656649c68"
-		if dto.ID == idMock {
+		if dto.ID == firstSensorID {
 			timestamps = append(timestamps, dto.Timestamp)
 		}
 	}
@@ -66,13 +79,6 @@ func TestMqttIntegration(t *testing.T) {
 		panic(session.Error())
 	}
 
-	repository := repository.NewSensorRepositoryMongo(mongoClient, "mongodb", "sensors")
-	findAllSensorsUseCase := usecase.NewFindAllSensorsUseCase(repository)
-
-	sensors, err := findAllSensorsUseCase.Execute()
-	if err != nil {
-		log.Fatalf("Failed to find all sensors: %v", err)
-	}
 
 	subscriberMqttRepository := mqtt.NewSubscriberMQTTRepository("sensors", 1, mqttClient)
 

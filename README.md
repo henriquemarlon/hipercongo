@@ -117,7 +117,7 @@ make run
 
 #### Testes unitários:
 
-#### Testes de integração
+#### Testes de integração:
 
 ## Demonstração do sistema
 

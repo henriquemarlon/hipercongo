@@ -15,29 +15,14 @@ Antes de continuar, é necessário instalar as dependências e criar os serviço
 
 Abaixo estão as possíveis interações e as instruções de como realizá-las.
 
-#### Definir as variáveis de ambiente:
+### Definir as variáveis de ambiente:
 
-###### Comando:
+#### Comando:
 ```shell
 
 ```
 
-###### Output:
-```shell
-
-```
-
-> [!NOTE]
-> - Note
-
-#### Rodar as migrations:
-
-###### Comando:
-```shell
-
-```
-
-###### Output:
+#### Output:
 ```shell
 
 ```
@@ -45,17 +30,32 @@ Abaixo estão as possíveis interações e as instruções de como realizá-las.
 > [!NOTE]
 > - Note
 
-#### Rodar testes:
+### Rodar as migrations:
+
+#### Comando:
+```shell
+
+```
+
+#### Output:
+```shell
+
+```
+
+> [!NOTE]
+> - Note
+
+### Rodar testes:
 
 Aqui, todos os comandos necessários estão sendo abstraídos por um arquivo Makefile. Se você tiver curiosidade para saber o que o comando abaixo faz, basta conferir [aqui]().
 
-###### Comando:
+#### Comando:
 
 ```shell
 make test
 ```
 
-###### Output:
+#### Output:
 
 ```shell
 
@@ -64,17 +64,17 @@ make test
 > [!NOTE]
 > - Note
 
-#### Rodar a visualização da cobertura de testes:
+### Rodar a visualização da cobertura de testes:
 
 Novamente, todos os comandos necessários estão sendo abstraídos por um arquivo Makefile. Se você tiver curiosidade para saber o que o comando abaixo faz, basta conferir [aqui](https://github.com/Inteli-College/2024-T0002-EC09-G04/blob/main/backend/Makefile#L21).
 
-###### Comando:
+#### Comando:
 
 ```bash
 make coverage 
 ```
 
-###### Output:
+#### Output:
 ```shell
 
 ```
@@ -82,17 +82,17 @@ make coverage
 > [!NOTE]
 >  - Este comando está criando, a partir do arquivo `coverage_sheet.md`, uma visualização da cobertura de testes nos principais arquivos Go.
 
-#### Rodar o sistema:
+### Rodar o sistema:
 
 Mais uma vez, todos os comandos necessários estão sendo abstraídos por um arquivo Makefile. Se você tiver curiosidade para saber o que o comando abaixo faz, basta conferir [aqui]().
 
-###### Comando:
+#### Comando:
 
 ```bash
 make run
 ```
 
-###### Output:
+#### Output:
 
 ```shell
 
@@ -103,21 +103,21 @@ make run
 
 ## Características do sistema
 
-#### Simulação:
+### Simulação:
 
-#### Mensageria:
+### Mensageria:
 
-#### Servidor WEB:
+### Servidor WEB:
 
-#### Banco de dados:
+### Banco de dados:
 
-#### Visualização:
+### Visualização:
 
 ## Desenvolvimento orientado a testes
 
-#### Testes unitários:
+### Testes unitários:
 
-#### Testes de integração:
+### Testes de integração:
 
 ## Demonstração do sistema
 

@@ -103,6 +103,10 @@ make run
 
 ## Características do sistema:
 
+## Desenvolvimento orientado a testes:
+
+## Demonstração do sistema:
+
 [^1]: A estrutura de pastas escolhida para este projeto está de acordo com as convenções e padrões utilizados pela comunidade de desenvolvedores Golang.
 
 [^2]: As entidades, repositórios e usecases estão de acordo com os padrões previstos para a arquitetura hexagonal.

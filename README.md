@@ -10,7 +10,7 @@ Antes de continuar, é necessário instalar as dependências e criar os serviço
 - Cluster MQTT - [HiveMQ Cloud](https://www.hivemq.com/article/step-by-step-guide-using-hivemq-cloud-starter-iot/)
 - Docker engine - [Install Docker Engine on Ubuntu
 ](https://docs.docker.com/engine/install/ubuntu/)
-- Build Essential - [https://itsfoss.com/build-essential-ubuntu/](https://itsfoss.com/build-essential-ubuntu/)
+- Build Essential - [What is Build Essential Package in Ubuntu?](https://itsfoss.com/build-essential-ubuntu/)
 
 ## Como rodar o sistema
 

@@ -254,7 +254,7 @@ app         | 2024/03/12 14:04:04 Inserting log into the MongoDB collection with
 ## Características do sistema
 
 ### Simulação:
-O sistema de simulução é responsável por hidratar entidades do tipo retratado abaixo passando os seus respectivos parâmetros. Nesse sentido, temos, para cada sensor, um payload criado a partir de uma relação que calcula o [intervalo de confiaça](https://en.wikipedia.org/wiki/Confidence_interval) entre o intervalo do dados fornecido a partir do [z-score](https://en.wikipedia.org/wiki/Standard_score) também definido nos parâmetros da função "NewSensorPayload".
+O sistema de simulução é responsável por hidratar entidades do tipo retratado abaixo passando os seus respectivos parâmetros. Nesse sentido, temos, para cada sensor, um payload criado a partir de uma relação que calcula o [intervalo de confiaça](https://en.wikipedia.org/wiki/Confidence_interval) entre o intervalo do dados fornecido a partir do [z-crítico](https://pt.wikipedia.org/wiki/Testes_de_hip%C3%B3teses) também definido nos parâmetros da função "NewSensorPayload".
 
 ![sensor_entity](https://github.com/henriquemarlon/hipercongo/assets/89201795/e64f1191-0d1e-4ab0-b651-39264bd21090)
 

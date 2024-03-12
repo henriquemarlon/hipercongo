@@ -8,8 +8,9 @@ Antes de continuar, é necessário instalar as dependências e criar os serviço
 
 - Cluster Kafka - [Confluent Cloud](https://docs.confluent.io/cloud/current/clusters/create-cluster.html#create-ak-clusters)
 - Cluster MQTT - [HiveMQ Cloud](https://www.hivemq.com/article/step-by-step-guide-using-hivemq-cloud-starter-iot/)
-- Docker engine - [Install Docker Engine on Ubuntu
-](https://docs.docker.com/engine/install/ubuntu/)
+- Cluster MongoDB - [MongoDB Atlas](https://www.mongodb.com/basics/clusters/mongodb-cluster-setup)
+- Instância PostgresSQL - [RDS](https://aws.amazon.com/getting-started/hands-on/create-connect-postgresql-db/) 
+- Docker engine - [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
 - Build Essential - [What is Build Essential Package in Ubuntu?](https://itsfoss.com/build-essential-ubuntu/)
 
 ## Como rodar o sistema
@@ -17,6 +18,7 @@ Antes de continuar, é necessário instalar as dependências e criar os serviço
 Siga as intruções abaixo para rodar o sistema junto a todos os seus recortes, simulação, mensageria, banco de dados e vicualização com o Metabase.
 
 ### Definir as variáveis de ambiente:
+Rode o comando abaixo e preecha com as respectivas variáveis de ambiente o arquivo `.env` criado dentro da pasta `/config`.
 
 #### Comando:
 ```shell
@@ -29,9 +31,10 @@ cp ./config/.env.develop.tmpl ./config/.env
 ```
 
 > [!NOTE]
-> - Note
+> Antes de preencher o arquivo `.env` é necessário criar os serviços de cloud presentes nas seção [#Dependências e Serviços](https://github.com/henriquemarlon/hipercongo/edit/main/README.md#depend%C3%AAncias-e-servi%C3%A7os)
 
 ### Rodar as migrações:
+As migrações, referem-se ao conjunto "queries" criadas com o objetivo de trazer agilidade ao processo de desevolvimento, que criam sensores no banco de dados que por sua vez servirão para contruir a simulação. 
 
 #### Comando:
 ```shell
@@ -47,7 +50,7 @@ migrations exited with code 0
 ```
 
 > [!NOTE]
-> - Note
+> Em uma cenário real, não precisaríamos de um arquivo como esse porque os sensores seriam criados por um frontend+backend que inseriria no banco de dados dos sensores
 
 ### Rodar testes:
 
@@ -92,7 +95,7 @@ ok      github.com/henriquemarlon/hipercongo/test       152.771s        coverage
 ```
 
 > [!NOTE]
-> - Note
+> A esteira de testes definida aqui é responsável popr testar as entitdade do ssistema e por realizar um teste de integração garantindo a entrega, e integridade e a frequência de envio dos dados, assim como o QoS da msg.
 
 ### Rodar a visualização da cobertura de testes:
 
@@ -246,14 +249,17 @@ app         | 2024/03/12 14:04:04 Inserting log into the MongoDB collection with
 ```
 
 > [!NOTE]
->  - Note
+> O comando responsável por rodar o sistema cria contianer para a simulação, visualização com Metabase, e para o app, que é composto por um consumer kafka e por uma interface responsável por armazenar os logs no banco de dados ( MongoDB ).
 
 ## Características do sistema
 
 ### Simulação:
+O sistema de simulução é responsável por hidratar entidades do tipo retratado abaixo passando os seus respectivos parâmetros. Nesse sentido, temos, para cada sensor, um payload criado a partir de uma relação que calcula o [intervalo de confiaça](https://en.wikipedia.org/wiki/Confidence_interval) entre o intervalo do dados fornecido a partir do [z-score](https://en.wikipedia.org/wiki/Standard_score) também definido nos parâmetros da função "NewSensorPayload".
+
 ![sensor_entity](https://github.com/henriquemarlon/hipercongo/assets/89201795/e64f1191-0d1e-4ab0-b651-39264bd21090)
 
 ### Mensageria:
+Para interagir com a mensageira, existe aqui uma implementação 
 ![kafka](https://github.com/henriquemarlon/hipercongo/assets/89201795/c9da37fa-896c-40d5-9199-2ee0d986400d)
 
 ### Servidor WEB:

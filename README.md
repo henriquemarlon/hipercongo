@@ -66,7 +66,7 @@ make tests
 
 ### Rodar a visualização da cobertura de testes:
 
-Novamente, todos os comandos necessários estão sendo abstraídos por um arquivo Makefile. Se você tiver curiosidade para saber o que o comando abaixo faz, basta conferir [aqui](https://github.com/Inteli-College/2024-T0002-EC09-G04/blob/main/backend/Makefile#L21).
+Novamente, todos os comandos necessários estão sendo abstraídos por um arquivo Makefile. Se você tiver curiosidade para saber o que o comando abaixo faz, basta conferir [aqui]().
 
 #### Comando:
 
@@ -75,9 +75,7 @@ make coverage
 ```
 
 #### Output:
-```shell
 
-```
 
 > [!NOTE]
 >  - Este comando está criando, a partir do arquivo `coverage_sheet.md`, uma visualização da cobertura de testes nos principais arquivos Go.

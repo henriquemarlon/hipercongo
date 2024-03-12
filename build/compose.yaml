@@ -38,13 +38,7 @@ services:
       dockerfile: build/Dockerfile.migrations
   metabase:
     image: metabase/metabase:latest
-    environment:
-      MB_DB_TYPE: postgres
-      MB_DB_DBNAME: postgres
-      MB_DB_PORT: 5432
-      MB_DB_USER: postgres
-      MB_DB_PASS: meta1234
-      MB_DB_HOST: database-metabase.cxic0so62a43.us-east-1.rds.amazonaws.com
-      MB_BREAKOUT_BIN_WIDTH: 0.01
+    env_file:
+      - ../config/.env
     ports:
       - "3000:3000"

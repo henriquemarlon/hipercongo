@@ -14,6 +14,7 @@ import (
 	"sort"
 	"testing"
 	"time"
+	"github.com/joho/godotenv"
 )
 
 type DTO struct {
@@ -23,6 +24,10 @@ type DTO struct {
 }
 
 func TestMqttIntegration(t *testing.T) {
+	err := godotenv.Load("../config/.env")
+	if err != nil {
+		t.Errorf("Error loading .env file: %v", err)
+	}
 	options := options.Client().ApplyURI(
 		fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s",
 			os.Getenv("MONGODB_ATLAS_USERNAME"),
@@ -72,7 +77,11 @@ func TestMqttIntegration(t *testing.T) {
 		}
 	}
 
-	opts := MQTT.NewClientOptions().AddBroker(fmt.Sprintf("ssl://%s:%s", os.Getenv("BROKER_TLS_URL"), os.Getenv("BROKER_PORT"))).SetUsername(os.Getenv("BROKER_USERNAME")).SetPassword(os.Getenv("BROKER_PASSWORD")).SetClientID("test-id")
+	opts := MQTT.NewClientOptions().AddBroker(
+		fmt.Sprintf("ssl://%s:%s", os.Getenv("BROKER_TLS_URL"),
+			os.Getenv("BROKER_PORT"))).SetUsername(
+		os.Getenv("BROKER_USERNAME")).SetPassword(
+		os.Getenv("BROKER_PASSWORD")).SetClientID("test-id")
 	opts.SetDefaultPublishHandler(handler)
 
 	mqttClient := MQTT.NewClient(opts)

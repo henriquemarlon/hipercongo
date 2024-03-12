@@ -24,7 +24,7 @@ make env
 
 #### Output:
 ```shell
-
+cp ./config/.env.develop.tmpl ./config/.env
 ```
 
 > [!NOTE]
@@ -39,7 +39,10 @@ make migrations
 
 #### Output:
 ```shell
-
+migrations  | Connection established successfully
+migrations  | Documents inserted. IDs: [ObjectID("65f0575382f1be93d94ae2c6") ObjectID("65f0575382f1be93d94ae2c7") ObjectID("65f0575382f1be93d94ae2c8") ObjectID("65f0575382f1be93d94ae2c9") ObjectID("65f0575382f1be93d94ae2ca")]
+migrations  | Connection to MongoDB closed.
+migrations exited with code 0
 ```
 
 > [!NOTE]
@@ -58,7 +61,33 @@ make tests
 #### Output:
 
 ```shell
-
+✔ Container simulation  Started                                                                                                      0.0s 
+?       github.com/henriquemarlon/hipercongo/cmd/app    [no test files]
+?       github.com/henriquemarlon/hipercongo/cmd/simulation     [no test files]
+?       github.com/henriquemarlon/hipercongo/internal/infra/kafka       [no test files]
+?       github.com/henriquemarlon/hipercongo/internal/infra/repository  [no test files]
+?       github.com/henriquemarlon/hipercongo/internal/infra/web [no test files]
+?       github.com/henriquemarlon/hipercongo/internal/usecase   [no test files]
+?       github.com/henriquemarlon/hipercongo/tools      [no test files]
+=== RUN   TestNewAlert
+--- PASS: TestNewAlert (0.00s)
+=== RUN   TestNewLog
+--- PASS: TestNewLog (0.00s)
+=== RUN   TestEntropy
+--- PASS: TestEntropy (0.00s)
+=== RUN   TestNewSensor
+--- PASS: TestNewSensor (0.00s)
+=== RUN   TestNewSensorPayload
+--- PASS: TestNewSensorPayload (0.00s)
+PASS
+coverage: 100.0% of statements
+ok      github.com/henriquemarlon/hipercongo/internal/domain/entity     0.005s  coverage: 100.0% of statements
+=== RUN   TestMqttIntegration
+2024/03/12 10:33:48 Selecting all sensors from the MongoDB collection sensors
+--- PASS: TestMqttIntegration (152.76s)
+PASS
+coverage: [no statements]
+ok      github.com/henriquemarlon/hipercongo/test       152.771s        coverage: [no statements]
 ```
 
 > [!NOTE]
@@ -75,7 +104,7 @@ make coverage
 ```
 
 #### Output:
-
+![output_coverage](https://github.com/henriquemarlon/hipercongo/assets/89201795/95767c00-44dd-4852-9d63-956e9947c4c6)
 
 > [!NOTE]
 >  - Este comando está criando, a partir do arquivo `coverage_sheet.md`, uma visualização da cobertura de testes nos principais arquivos Go.
@@ -121,6 +150,9 @@ make run
 ## Desenvolvimento orientado a testes
 
 ### Testes unitários:
+![sensor_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/52d2e87a-6d7b-4dea-9232-2b93309180c9)
+![log_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/896254be-cf8a-4883-93ba-5e5172d97ba1)
+![alert_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/45be50cf-0fcc-487e-b15b-83736ada0307)
 
 ### Testes de integração:
 

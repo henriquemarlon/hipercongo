@@ -4,17 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
-	"testing"
-	"time"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/henriquemarlon/hipercongo/internal/infra/repository"
 	"github.com/henriquemarlon/hipercongo/internal/usecase"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
+	"sort"
+	"testing"
+	"time"
 )
 
 type DTO struct {
@@ -24,20 +23,24 @@ type DTO struct {
 }
 
 func TestMqttIntegration(t *testing.T) {
-	godotenv.Load("../config/.env")
-	options := options.Client().ApplyURI(fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s", os.Getenv("MONGODB_ATLAS_USERNAME"), os.Getenv("MONGODB_ATLAS_PASSWORD"), os.Getenv("MONGODB_ATLAS_CLUSTER_HOSTNAME"), os.Getenv("MONGODB_ATLAS_APP_NAME")))
+	options := options.Client().ApplyURI(
+		fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s",
+			os.Getenv("MONGODB_ATLAS_USERNAME"),
+			os.Getenv("MONGODB_ATLAS_PASSWORD"),
+			os.Getenv("MONGODB_ATLAS_CLUSTER_HOSTNAME"),
+			os.Getenv("MONGODB_ATLAS_APP_NAME")))
 	mongoClient, err := mongo.Connect(context.TODO(), options)
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
 	}
-	
+
 	err = mongoClient.Ping(context.TODO(), nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var receipts []DTO
 	var timestamps []time.Time
-	
+
 	repository := repository.NewSensorRepositoryMongo(mongoClient, "mongodb", "sensors")
 	findAllSensorsUseCase := usecase.NewFindAllSensorsUseCase(repository)
 
@@ -49,9 +52,9 @@ func TestMqttIntegration(t *testing.T) {
 	var firstSensorID string
 
 	if len(sensors) > 0 {
-			firstSensorID = sensors[0].ID
+		firstSensorID = sensors[0].ID
 	} else {
-			log.Fatal("No sensors found")
+		log.Fatal("No sensors found")
 	}
 
 	var handler MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
@@ -76,8 +79,8 @@ func TestMqttIntegration(t *testing.T) {
 
 	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
-	}	
-	
+	}
+
 	go func() {
 		if token := mqttClient.Subscribe("sensors", 1, nil); token.Wait() && token.Error() != nil {
 			fmt.Println(token.Error())
@@ -86,7 +89,6 @@ func TestMqttIntegration(t *testing.T) {
 	}()
 
 	defer mqttClient.Disconnect(500)
-
 
 	time.Sleep(150 * time.Second)
 

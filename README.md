@@ -259,30 +259,54 @@ O sistema de simulução é responsável por hidratar entidades do tipo retratad
 ![sensor_entity](https://github.com/henriquemarlon/hipercongo/assets/89201795/e64f1191-0d1e-4ab0-b651-39264bd21090)
 
 ### Mensageria:
-Para interagir com a mensageira, existe aqui uma implementação 
+Para interagir com a mensageira, existe aqui uma implementação de um consumer kafka que utiliza o pacote [confluent-kafka-go](https://github.com/confluentinc/confluent-kafka-go/v2/kafka) para receber as mensagens que foram enviadas pela simulação, na figura dos sensores, e, pela integração entre o Confluentic Cloud e o HiveMQ Cloud, foram enfileiradas na fila correspondente.
+
 ![kafka](https://github.com/henriquemarlon/hipercongo/assets/89201795/c9da37fa-896c-40d5-9199-2ee0d986400d)
 
 ### Servidor WEB:
+O servidor contém rotas de criação de sensores, criação de alertas e para pegar todos os alertas do banco de dados. Essa implementação utiliza o [chi](https://github.com/go-chi/chi) que é um roteador idiomático e combinável para construir serviços Go HTTP.
+ 
 ![web](https://github.com/henriquemarlon/hipercongo/assets/89201795/4b15e627-dc83-413a-aa4a-a5e2e8abffce)
 
 ### Banco de dados:
 
+Este recorte implementa um repositório para operações CRUD relacionadas a alertas em um banco de dados MongoDB. Ele utiliza a biblioteca oficial do MongoDB para Go, define uma estrutura AlertRepositoryMongo com métodos para criar alertas e recuperar todos os alertas armazenados. A função CreateAlert insere um alerta no MongoDB, enquanto a função FindAllAlerts recupera todos os alertas da coleção, decodificando os documentos BSON para a estrutura de dados apropriada. Em resumo, o código oferece uma abstração para interagir eficientemente com o MongoDB no contexto do gerenciamento de alertas:
+
+![alert_repo](https://github.com/henriquemarlon/hipercongo/assets/89201795/e7b40b9d-89ca-427a-ae75-8f0a4efc9642)
+
+Este outro recorte para interação com o banco de dados, implementa um repositório para logs de sensores no MongoDB. Ele fornece métodos para criar e armazenar logs no banco de dados, simplificando a interação entre o programa e o MongoDB:
+
 ![sensor_log](https://github.com/henriquemarlon/hipercongo/assets/89201795/c33bf0c5-4e2d-4084-a7b0-50d1fe8441da)
+
+Este, por sua vez, implementa um repositório para interagir com um banco de dados MongoDB, permitindo criar sensores e recuperar informações sobre todos os sensores armazenados. Ele encapsula operações de criação e leitura, facilitando a interação entre o programa e o MongoDB:
 
 ![sensor](https://github.com/henriquemarlon/hipercongo/assets/89201795/9de0254f-45cb-40b1-8b61-1844f28f5c98)
 
 ### Visualização:
 
-## Desenvolvimento orientado a testes
+O Metabase é uma ferramenta de análise e visualização de dados de código aberto. Ele permite que usuários explorem, visualizem e compartilhem insights a partir de conjuntos de dados, sem a necessidade de conhecimento avançado em SQL ou programação. O Metabase facilita a criação de painéis interativos e consultas personalizadas, tornando a análise de dados mais acessível para uma variedade de usuários. Nesse projeto, ele é utilizado para a visualização das entidades presentes no banco de dados, criando gráficos, mapas e outros insights. Abaixo uma visão geral do dashboard criado: 
+
+## Desenvolvimento Orientado a Testes
+A adoção do TDD (Desenvolvimento Orientado a Testes) é uma prática que oferece inúmeros benefícios no processo de desenvolvimento de software. Além de proporcionar feedback imediato sobre as novas funcionalidades, como mencionado anteriormente, o TDD promove a criação de um código mais limpo. Isso ocorre porque os desenvolvedores escrevem códigos simples, focados na passagem dos testes, resultando em uma base de código mais clara e fácil de manter. Essa abordagem não apenas acelera o ciclo de desenvolvimento, mas também contribui para a sustentabilidade e qualidade a longo prazo do software. Segue abaixo uma breve explicação de como esse projeto implementa isso.
 
 ### Testes unitários:
+
+O teste TestEntropy avalia se a função Entropy retorna valores dentro do intervalo esperado. O teste TestNewSensor verifica a criação correta de um Sensor. O teste TestNewSensorPayload assegura que a criação de um SensorPayload inicialize corretamente os atributos e que os valores estejam nos intervalos adequados. Há também planos futuros (TODO) para adicionar testes que lidem com casos específicos e parâmetros inválidos.
+
 ![sensor_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/52d2e87a-6d7b-4dea-9232-2b93309180c9)
+
+Este teste avalia a função NewLog do pacote entity. Ele cria uma instância de Log com valores específicos e, em seguida, verifica se os atributos Sensor_ID e Data são inicializados corretamente. Se algum desses valores não estiver de acordo com as expectativas, o teste emite uma mensagem de erro indicando a discrepância. O teste tem como objetivo assegurar que a função de criação de logs esteja produzindo objetos com os valores desejados.
+
 ![log_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/896254be-cf8a-4883-93ba-5e5172d97ba1)
+
+Este teste verifica a função NewAlert do pacote entity. Ele cria uma instância de Alert com valores específicos e, em seguida, verifica se os atributos Latitude, Longitude e Option são inicializados corretamente. Se algum desses valores não estiver de acordo com as expectativas, o teste emite uma mensagem de erro indicando a discrepância. O teste tem o objetivo de garantir que a função de criação de alertas esteja produzindo objetos com os valores desejados.
+
 ![alert_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/45be50cf-0fcc-487e-b15b-83736ada0307)
 
 ### Testes de integração:
+Os testes de integração até agora implementados, tem como objetivo avaliar os seguintes pontos: QoS ( Se a mensagem é transmitida dentro do sistema com o QoS definido inicialmente ), Frequência de envio das mensagens ( As mensagens estão sendo enviadas na frequência definida, com uma margem de erro razoável? ), Integridade das mensagens ( A estrutura as mensagens se modifica durante a o processo transmissão? ). Para encontrar mais detalhes sobre a implementação dos testes de integração, acesse o [arquivo](https://github.com/henriquemarlon/hipercongo/blob/main/test/integration_mqtt_test.go)
 
-## Demonstração do sistema
+## Demonstração do Sistema
 
 [^1]: A estrutura de pastas escolhida para este projeto está de acordo com as convenções e padrões utilizados pela comunidade de desenvolvedores Golang.
 

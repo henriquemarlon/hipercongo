@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
@@ -13,7 +14,6 @@ import (
 	"os"
 	"sync"
 	"time"
-	"encoding/json"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatal( err)
+		log.Fatal(err)
 	}
 
 	repository := repository.NewSensorRepositoryMongo(client, "mongodb", "sensors")
@@ -47,7 +47,12 @@ func main() {
 		log.Printf("Starting sensor: %v", sensor)
 		go func(sensor usecase.FindAllSensorsOutputDTO) {
 			defer wg.Done()
-			opts := MQTT.NewClientOptions().AddBroker(fmt.Sprintf("ssl://%s:%s", os.Getenv("BROKER_TLS_URL"), os.Getenv("BROKER_PORT"))).SetUsername(os.Getenv("BROKER_USERNAME")).SetPassword(os.Getenv("BROKER_PASSWORD")).SetClientID(sensor.ID)
+			opts := MQTT.NewClientOptions().AddBroker(
+				fmt.Sprintf("ssl://%s:%s",
+					os.Getenv("BROKER_TLS_URL"),
+					os.Getenv("BROKER_PORT"))).SetUsername(
+				os.Getenv("BROKER_USERNAME")).SetPassword(
+				os.Getenv("BROKER_PASSWORD")).SetClientID(sensor.ID)
 			client := MQTT.NewClient(opts)
 			if session := client.Connect(); session.Wait() && session.Error() != nil {
 				log.Fatalf("Failed to connect to MQTT broker: %v", session.Error())
@@ -66,11 +71,11 @@ func main() {
 				if err != nil {
 					log.Println("Error converting to JSON:", err)
 				}
-				
+
 				token := client.Publish("sensors", 1, false, string(jsonBytesPayload))
 				log.Printf("Published: %s, on topic: %s", string(jsonBytesPayload), "sensors")
 				token.Wait()
-				time.Sleep(60 * time.Second)
+				time.Sleep(120 * time.Second)
 			}
 		}(sensor)
 	}

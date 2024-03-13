@@ -99,7 +99,7 @@ func TestMqttIntegration(t *testing.T) {
 
 	defer mqttClient.Disconnect(500)
 
-	time.Sleep(150 * time.Second)
+	time.Sleep(300 * time.Second)
 
 	if len(receipts) < len(sensors) {
 		t.Errorf("Messages receipts received less than expected %v", len(receipts))

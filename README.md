@@ -306,7 +306,7 @@ Este teste verifica a função NewAlert do pacote entity. Ele cria uma instânci
 ![alert_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/45be50cf-0fcc-487e-b15b-83736ada0307)
 
 ### Testes de integração:
-Os testes de integração até agora implementados, tem como objetivo avaliar os seguintes pontos: QoS ( Se a mensagem é transmitida dentro do sistema com o QoS definido inicialmente ), Frequência de envio das mensagens ( As mensagens estão sendo enviadas na frequência definida, com uma margem de erro razoável? ), Integridade das mensagens ( A estrutura as mensagens se modifica durante a o processo transmissão? ). Para encontrar mais detalhes sobre a implementação dos testes de integração, acesse o [arquivo](https://github.com/henriquemarlon/hipercongo/blob/main/test/integration_mqtt_test.go)
+Os testes de integração até agora implementados, tem como objetivo avaliar os seguintes pontos: QoS ( Se a mensagem é transmitida dentro do sistema com o QoS definido inicialmente ), Frequência de envio das mensagens ( As mensagens estão sendo enviadas na frequência definida, com uma margem de erro razoável? ), Integridade das mensagens ( A estrutura as mensagens se modifica durante a o processo transmissão? ). Para encontrar mais detalhes sobre a implementação dos testes de integração, acesse o [arquivo](https://github.com/henriquemarlon/hipercongo/blob/main/test/integration_mqtt_test.go).
 
 ## Demonstração do Sistema
 

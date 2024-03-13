@@ -256,31 +256,333 @@ app         | 2024/03/12 14:04:04 Inserting log into the MongoDB collection with
 ### Simulação:
 O sistema de simulução é responsável por hidratar entidades do tipo retratado abaixo passando os seus respectivos parâmetros. Nesse sentido, temos, para cada sensor, um payload criado a partir de uma relação que calcula o [intervalo de confiaça](https://en.wikipedia.org/wiki/Confidence_interval) entre o intervalo do dados fornecido a partir do [z-crítico](https://pt.wikipedia.org/wiki/Testes_de_hip%C3%B3teses) também definido nos parâmetros da função "NewSensorPayload".
 
-![sensor_entity](https://github.com/henriquemarlon/hipercongo/assets/89201795/e64f1191-0d1e-4ab0-b651-39264bd21090)
+```golang
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
+	"github.com/henriquemarlon/hipercongo/internal/infra/repository"
+	"github.com/henriquemarlon/hipercongo/internal/usecase"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"os"
+	"sync"
+	"time"
+)
+
+func main() {
+	options := options.Client().ApplyURI(
+		fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s",
+			os.Getenv("MONGODB_ATLAS_USERNAME"),
+			os.Getenv("MONGODB_ATLAS_PASSWORD"),
+			os.Getenv("MONGODB_ATLAS_CLUSTER_HOSTNAME"),
+			os.Getenv("MONGODB_ATLAS_APP_NAME")))
+	client, err := mongo.Connect(context.TODO(), options)
+	if err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	repository := repository.NewSensorRepositoryMongo(client, "mongodb", "sensors")
+	findAllSensorsUseCase := usecase.NewFindAllSensorsUseCase(repository)
+
+	sensors, err := findAllSensorsUseCase.Execute()
+	if err != nil {
+		log.Fatalf("Failed to find all sensors: %v", err)
+	}
+
+	var wg sync.WaitGroup
+	for _, sensor := range sensors {
+		wg.Add(1)
+		log.Printf("Starting sensor: %v", sensor)
+		go func(sensor usecase.FindAllSensorsOutputDTO) {
+			defer wg.Done()
+			opts := MQTT.NewClientOptions().AddBroker(
+				fmt.Sprintf("ssl://%s:%s",
+					os.Getenv("BROKER_TLS_URL"),
+					os.Getenv("BROKER_PORT"))).SetUsername(
+				os.Getenv("BROKER_USERNAME")).SetPassword(
+				os.Getenv("BROKER_PASSWORD")).SetClientID(sensor.ID)
+			client := MQTT.NewClient(opts)
+			if session := client.Connect(); session.Wait() && session.Error() != nil {
+				log.Fatalf("Failed to connect to MQTT broker: %v", session.Error())
+			}
+			for {
+				payload, err := entity.NewSensorPayload(
+					sensor.ID,
+					sensor.Params,
+					time.Now(),
+				)
+				if err != nil {
+					log.Fatalf("Failed to create payload: %v", err)
+				}
+
+				jsonBytesPayload, err := json.Marshal(payload)
+				if err != nil {
+					log.Println("Error converting to JSON:", err)
+				}
+
+				token := client.Publish("sensors", 1, false, string(jsonBytesPayload))
+				log.Printf("Published: %s, on topic: %s", string(jsonBytesPayload), "sensors")
+				token.Wait()
+				time.Sleep(120 * time.Second)
+			}
+		}(sensor)
+	}
+	wg.Wait()
+}
+```
 
 ### Mensageria:
 Para interagir com a mensageira, existe aqui uma implementação de um consumer kafka que utiliza o pacote [confluent-kafka-go](https://github.com/confluentinc/confluent-kafka-go/v2/kafka) para receber as mensagens que foram enviadas pela simulação, na figura dos sensores, e, pela integração entre o Confluentic Cloud e o HiveMQ Cloud, foram enfileiradas na fila correspondente.
 
-![kafka](https://github.com/henriquemarlon/hipercongo/assets/89201795/c9da37fa-896c-40d5-9199-2ee0d986400d)
+```golang
+package kafka
+
+import (
+	"fmt"
+	"log"
+
+	ckafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
+)
+
+type KafkaConsumer struct {
+	ConfigMap *ckafka.ConfigMap
+	Topics    []string
+}
+
+func NewKafkaConsumer(configMap *ckafka.ConfigMap, topics []string) *KafkaConsumer {
+	return &KafkaConsumer{
+		ConfigMap: configMap,
+		Topics:    topics,
+	}
+}
+
+func (c *KafkaConsumer) Consume(msgChan chan *ckafka.Message) error {
+	consumer, err := ckafka.NewConsumer(c.ConfigMap)
+	if err != nil {
+		log.Printf("Error creating kafka consumer: %v", err)
+	}
+	err = consumer.SubscribeTopics(c.Topics, nil)
+	if err != nil {
+		log.Printf("Error subscribing to topics: %v", err)
+	}
+	for {
+		msg, err := consumer.ReadMessage(-1)
+		log.Printf("Message on %s: %s", msg.TopicPartition, string(msg.Value))
+		if err == nil {
+			msgChan <- msg
+		} else {
+			fmt.Printf("Consumer error: %v (%v)\n", err, msg)
+		}
+	}
+}
+```
 
 ### Servidor WEB:
 O servidor contém rotas de criação de sensores, criação de alertas e para pegar todos os alertas do banco de dados. Essa implementação utiliza o [chi](https://github.com/go-chi/chi) que é um roteador idiomático e combinável para construir serviços Go HTTP.
- 
-![web](https://github.com/henriquemarlon/hipercongo/assets/89201795/4b15e627-dc83-413a-aa4a-a5e2e8abffce)
 
+```golang
+sensorsLogRepository := repository.NewSensorLogRepositoryMongo(client, "mongodb", "sensors_log")
+createSensorLogUseCase := usecase.NewCreateSensorLogUseCase(sensorsLogRepository)
+sensorsRepository := repository.NewSensorRepositoryMongo(client, "mongodb", "sensors")
+createSensorUseCase := usecase.NewCreateSensorUseCase(sensorsRepository)
+sensorHandlers := web.NewSensorHandlers(createSensorUseCase)
+
+alertRepository := repository.NewAlertRepositoryMongo(client, "mongodb", "alerts")
+createAlertUseCase := usecase.NewCreateAlertUseCase(alertRepository)
+findAllAlertsUseCase := usecase.NewFindAllAlertsUseCase(alertRepository)
+alertHandlers := web.NewAlertHandlers(createAlertUseCase, findAllAlertsUseCase)
+
+//TODO: this is the best way to do this? need to refactor or find another way to start the server
+router := chi.NewRouter()
+router.Get("/alerts", alertHandlers.FindAllAlertsHandler)
+router.Post("/alerts", alertHandlers.CreateAlertHandler)
+router.Post("/sensors", sensorHandlers.CreateSensorHandler)
+go http.ListenAndServe(":8080", router)
+```
+ 
 ### Banco de dados:
 
 Este recorte implementa um repositório para operações CRUD relacionadas a alertas em um banco de dados MongoDB. Ele utiliza a biblioteca oficial do MongoDB para Go, define uma estrutura AlertRepositoryMongo com métodos para criar alertas e recuperar todos os alertas armazenados. A função CreateAlert insere um alerta no MongoDB, enquanto a função FindAllAlerts recupera todos os alertas da coleção, decodificando os documentos BSON para a estrutura de dados apropriada. Em resumo, o código oferece uma abstração para interagir eficientemente com o MongoDB no contexto do gerenciamento de alertas:
 
-![alert_repo](https://github.com/henriquemarlon/hipercongo/assets/89201795/e7b40b9d-89ca-427a-ae75-8f0a4efc9642)
+```golang
+package repository
 
+import (
+	"context"
+	"log"
+	"fmt"
+	"encoding/json"
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type AlertRepositoryMongo struct {
+	Collection *mongo.Collection
+}
+
+func NewAlertRepositoryMongo(client *mongo.Client, dbName string, collectionName string) *AlertRepositoryMongo {
+	collection := client.Database(dbName).Collection(collectionName)
+	return &AlertRepositoryMongo{
+		Collection: collection,
+	}
+}
+
+func (a *AlertRepositoryMongo) CreateAlert(alert *entity.Alert) (*mongo.InsertOneResult, error) {
+	result, err := a.Collection.InsertOne(context.TODO(), alert)
+	log.Printf("Inserting alert into the MongoDB collection")
+	return result, err
+}
+
+func (a *AlertRepositoryMongo) FindAllAlerts() ([]*entity.Alert, error) {
+	cur, err := a.Collection.Find(context.TODO(), bson.D{})
+	log.Printf("Selecting all alerts from the MongoDB collection %s", a.Collection.Name())
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	var alerts []*entity.Alert
+	for cur.Next(context.TODO()) {
+		var alert bson.M
+		err := cur.Decode(&alert)
+		if err == mongo.ErrNoDocuments {
+			fmt.Printf("No document was found")
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+
+		jsonAlertData, err := json.MarshalIndent(alert, "", " ")
+		if err != nil {
+			return nil, err
+		}
+
+		var alertData entity.Alert
+		err = json.Unmarshal(jsonAlertData, &alertData)
+		if err != nil {
+			return nil, err
+		}
+		alerts = append(alerts, &alertData)
+	}
+
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
+	return alerts, nil
+}
+```
 Este outro recorte para interação com o banco de dados, implementa um repositório para logs de sensores no MongoDB. Ele fornece métodos para criar e armazenar logs no banco de dados, simplificando a interação entre o programa e o MongoDB:
 
-![sensor_log](https://github.com/henriquemarlon/hipercongo/assets/89201795/c33bf0c5-4e2d-4084-a7b0-50d1fe8441da)
+```golang
+package repository
+
+import (
+	"context"
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
+)
+
+type SensorLogRepositoryMongo struct {
+	Collection *mongo.Collection
+}
+
+func NewSensorLogRepositoryMongo(client *mongo.Client, dbName string, collection string) *SensorRepositoryMongo {
+	sensorsColl := client.Database(dbName).Collection(collection)
+	return &SensorRepositoryMongo{
+		Collection: sensorsColl,
+	}
+}
+
+func (s *SensorRepositoryMongo) CreateSensorLog(sensorLog *entity.Log) error {
+	result, err := s.Collection.InsertOne(context.TODO(), sensorLog)
+	log.Printf("Inserting log into the MongoDB collection with id: %s", result)
+	return err
+}
+```
 
 Este, por sua vez, implementa um repositório para interagir com um banco de dados MongoDB, permitindo criar sensores e recuperar informações sobre todos os sensores armazenados. Ele encapsula operações de criação e leitura, facilitando a interação entre o programa e o MongoDB:
 
-![sensor](https://github.com/henriquemarlon/hipercongo/assets/89201795/9de0254f-45cb-40b1-8b61-1844f28f5c98)
+```golang
+package repository
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/henriquemarlon/hipercongo/internal/domain/entity"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
+)
+
+type SensorRepositoryMongo struct {
+	Collection *mongo.Collection
+}
+
+func NewSensorRepositoryMongo(client *mongo.Client, dbName string, sensorsCollection string) *SensorRepositoryMongo {
+	collection := client.Database(dbName).Collection(sensorsCollection)
+	return &SensorRepositoryMongo{
+		Collection: collection,
+	}
+}
+
+func (s *SensorRepositoryMongo) CreateSensor(sensor *entity.Sensor) (*mongo.InsertOneResult, error) {
+	result, err := s.Collection.InsertOne(context.TODO(), sensor)
+	log.Printf("Inserting sensor %s into the MongoDB collection: %s", result, s.Collection.Name())
+	return result, err
+}
+
+func (s *SensorRepositoryMongo) FindAllSensors() ([]*entity.Sensor, error) {
+	cur, err := s.Collection.Find(context.TODO(), bson.D{})
+	log.Printf("Selecting all sensors from the MongoDB collection %s", s.Collection.Name())
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	var sensors []*entity.Sensor
+	for cur.Next(context.TODO()) {
+		var sensor bson.M
+		err := cur.Decode(&sensor)
+		if err == mongo.ErrNoDocuments {
+			fmt.Printf("No document was found")
+		} else if err != nil {
+			return nil, err
+		}
+
+		jsonSensorData, err := json.MarshalIndent(sensor, "", " ")
+		if err != nil {
+			return nil, err
+		}
+
+		var sensorData entity.Sensor
+		err = json.Unmarshal(jsonSensorData, &sensorData)
+		if err != nil {
+			return nil, err
+		}
+		sensors = append(sensors, &sensorData)
+	}
+
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+	return sensors, nil
+}
+```
 
 ### Visualização:
 
@@ -295,15 +597,102 @@ A adoção do TDD (Desenvolvimento Orientado a Testes) é uma prática que ofere
 
 O teste TestEntropy avalia se a função Entropy retorna valores dentro do intervalo esperado. O teste TestNewSensor verifica a criação correta de um Sensor. O teste TestNewSensorPayload assegura que a criação de um SensorPayload inicialize corretamente os atributos e que os valores estejam nos intervalos adequados. Há também planos futuros (TODO) para adicionar testes que lidem com casos específicos e parâmetros inválidos.
 
-![sensor_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/52d2e87a-6d7b-4dea-9232-2b93309180c9)
+```golang
+package entity
 
+import (
+	"testing"
+	"time"
+)
+
+func TestEntropy(t *testing.T) {
+	entropy := Entropy([]float64{0, 100})
+	if entropy <= 0 && entropy >= 100 {
+		t.Errorf("Entropy should be between 0 and 100")
+	}
+}
+
+func TestNewSensor(t *testing.T) {
+	sensor := NewSensor("name", 0, 0, map[string]Param{"key": {Min: 0, Max: 100, Factor: 0.5}})
+	if sensor.Name != "name" {
+		t.Errorf("Name should be name")
+	}
+	if sensor.Latitude != 0 {
+		t.Errorf("Latitude should be 0")
+	}
+	if sensor.Longitude != 0 {
+		t.Errorf("Longitude should be 0")
+	}
+}
+
+func TestNewSensorPayload(t *testing.T) {
+	sensorPayload, _ := NewSensorPayload("id", map[string]Param{"key": {Min: 0, Max: 100, Factor: 0.5}}, time.Now())
+	if sensorPayload.Sensor_ID != "id" {
+			t.Errorf("Sensor_ID should be id")
+	}
+	if value, ok := sensorPayload.Data["key"].(float64); ok {
+			if !(value <= 180 && value >= 0) {
+					t.Errorf("Invalid value for Data['key'], expected outside the range %v and %v, got %v", 0, 100, value)
+			}
+	} else {
+			t.Errorf("Invalid type for Data['key']")
+	}
+}
+
+
+//TODO: add test for NewSensorPayload() with invalid params
+
+//TODO: add test for NewSensorPayload() with invalid sensor_id
+
+//TODO: add test for NewSensorPayload() with invalid data
+
+//TODO: add test for NewSensorPayload() testing confidence interval
+
+//TODO: add test for NewSensorPayload() with invalid timestamp
+```
 Este teste avalia a função NewLog do pacote entity. Ele cria uma instância de Log com valores específicos e, em seguida, verifica se os atributos Sensor_ID e Data são inicializados corretamente. Se algum desses valores não estiver de acordo com as expectativas, o teste emite uma mensagem de erro indicando a discrepância. O teste tem como objetivo assegurar que a função de criação de logs esteja produzindo objetos com os valores desejados.
 
-![log_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/896254be-cf8a-4883-93ba-5e5172d97ba1)
+```golang
+package entity
+
+import (
+	"testing"
+	"time"
+)
+
+func TestNewLog(t *testing.T) {
+	log := NewLog("id", map[string]interface{}{"key": "value"}, time.Now())
+	if log.Sensor_ID != "id" {
+		t.Errorf("Sensor_ID should be id")
+	}
+	if log.Data["key"] != "value" {
+		t.Errorf("Data should be value")
+	}
+}
+```
 
 Este teste verifica a função NewAlert do pacote entity. Ele cria uma instância de Alert com valores específicos e, em seguida, verifica se os atributos Latitude, Longitude e Option são inicializados corretamente. Se algum desses valores não estiver de acordo com as expectativas, o teste emite uma mensagem de erro indicando a discrepância. O teste tem o objetivo de garantir que a função de criação de alertas esteja produzindo objetos com os valores desejados.
 
-![alert_unit](https://github.com/henriquemarlon/hipercongo/assets/89201795/45be50cf-0fcc-487e-b15b-83736ada0307)
+```golang
+package entity
+
+import (
+	"testing"
+)
+
+func TestNewAlert(t *testing.T) {
+	alert := NewAlert(0, 0, "")
+	if alert.Latitude != 0 {
+		t.Errorf("Latitude should be 0")
+	}
+	if alert.Longitude != 0 {
+		t.Errorf("Longitude should be 0")
+	}
+	if alert.Option != "" {
+		t.Errorf("Option should be empty")
+	}
+}
+```
 
 ### Testes de integração:
 Os testes de integração até agora implementados, tem como objetivo avaliar os seguintes pontos: QoS ( Se a mensagem é transmitida dentro do sistema com o QoS definido inicialmente ), Frequência de envio das mensagens ( As mensagens estão sendo enviadas na frequência definida, com uma margem de erro razoável? ), Integridade das mensagens ( A estrutura as mensagens se modifica durante a o processo transmissão? ). Para encontrar mais detalhes sobre a implementação dos testes de integração, acesse o [arquivo](https://github.com/henriquemarlon/hipercongo/blob/main/test/integration_mqtt_test.go).

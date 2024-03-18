@@ -113,7 +113,7 @@ func TestMqttIntegration(t *testing.T) {
 				})
 				totalDifference := timestamps[len(timestamps)-1].Sub(timestamps[0])
 				errorMargin := 5 * time.Second
-				desiredDifference := time.Minute
+				desiredDifference := 2 * time.Minute
 				isLessThanOneMinutePlusError := totalDifference.Seconds()/float64(len(timestamps)-1) >= (desiredDifference.Seconds()-errorMargin.Seconds()) && totalDifference.Seconds()/float64(len(timestamps)-1) <= (desiredDifference.Seconds()+errorMargin.Seconds())
 				if !isLessThanOneMinutePlusError {
 					t.Error("No matching messages found with a 1-minute timestamp difference")
